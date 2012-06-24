@@ -60,6 +60,7 @@
 	BOOL _rotating;
     BOOL _viewIsActive; // active as in it's in the view heirarchy
     BOOL _didSavePreviousStateOfNavBar;
+    BOOL _buttonOnLeft;
     
 }
 
@@ -139,6 +140,7 @@ navigationBarBackgroundImageLandscapePhone = _navigationBarBackgroundImageLandsc
 @synthesize displayActionButton = _displayActionButton, actionsSheet = _actionsSheet;
 @synthesize progressHUD = _progressHUD;
 @synthesize previousViewControllerBackButton = _previousViewControllerBackButton;
+@synthesize closeButtonCaption = _closeButtonCaption;
 
 #pragma mark - NSObject
 
@@ -158,6 +160,9 @@ navigationBarBackgroundImageLandscapePhone = _navigationBarBackgroundImageLandsc
         _photos = [[NSMutableArray alloc] init];
         _displayActionButton = NO;
         _didSavePreviousStateOfNavBar = NO;
+        _buttonOnLeft = NO;
+        _closeButtonCaption = NSLocalizedString(@"Done", nil);
+
         
         // Listen for MWPhoto notifications
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -200,6 +205,7 @@ navigationBarBackgroundImageLandscapePhone = _navigationBarBackgroundImageLandsc
     [[SDImageCache sharedImageCache] clearMemory]; // clear memory
     [_photos release];
     [_progressHUD release];
+    [_closeButtonCaption release];
     [super dealloc];
 }
 
@@ -297,7 +303,7 @@ navigationBarBackgroundImageLandscapePhone = _navigationBarBackgroundImageLandsc
     // Navigation buttons
     if ([self.navigationController.viewControllers objectAtIndex:0] == self) {
         // We're first on stack so show done button
-        UIBarButtonItem *doneButton = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", nil) style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)] autorelease];
+        UIBarButtonItem *doneButton = [[[UIBarButtonItem alloc] initWithTitle:_closeButtonCaption style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)] autorelease];
         // Set appearance
         if ([UIBarButtonItem respondsToSelector:@selector(appearance)]) {
             [doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
@@ -307,7 +313,9 @@ navigationBarBackgroundImageLandscapePhone = _navigationBarBackgroundImageLandsc
             [doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateNormal];
             [doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateHighlighted];
         }
+     
         self.navigationItem.rightBarButtonItem = doneButton;
+    
     } else {
         // We're not first so show back button
         UIViewController *previousViewController = [self.navigationController.viewControllers objectAtIndex:self.navigationController.viewControllers.count-2];
@@ -330,7 +338,7 @@ navigationBarBackgroundImageLandscapePhone = _navigationBarBackgroundImageLandsc
 	_pagingScrollView.contentOffset = [self contentOffsetForPageAtIndex:_currentPageIndex];
     [self tilePages];
     _performingLayout = NO;
-    
+
 }
 
 // Release any retained subviews of the main view.
@@ -982,6 +990,7 @@ navigationBarBackgroundImageLandscapePhone = _navigationBarBackgroundImageLandsc
         if (!_viewIsActive) [self tilePages]; // Force tiling if view is not visible
     }
 }
+
 
 #pragma mark - Misc
 
